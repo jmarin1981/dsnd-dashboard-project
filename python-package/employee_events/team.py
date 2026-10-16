@@ -1,55 +1,57 @@
+
 # Import the QueryBase class
-# YOUR CODE HERE
+from .query_base import QueryBase
 
-# Import dependencies for sql execution
-#### YOUR CODE HERE
-
-# Create a subclass of QueryBase
-# called  `Team`
-#### YOUR CODE HERE
-
-    # Set the class attribute `name`
-    # to the string "team"
-    #### YOUR CODE HERE
+# Import dependencies for SQL execution
+from .sql_execution import query
+import pandas as pd
+from functools import wraps
 
 
-    # Define a `names` method
-    # that receives no arguments
-    # This method should return
-    # a list of tuples from an sql execution
-    #### YOUR CODE HERE
-        
-        # Query 5
-        # Write an SQL query that selects
-        # the team_name and team_id columns
-        # from the team table for all teams
-        # in the database
-        #### YOUR CODE HERE
-    
+# Decorator to return SQL results as a DataFrame
+def pandas_query(func):
+    execute_query = query(func)
 
-    # Define a `username` method
-    # that receives an ID argument
-    # This method should return
-    # a list of tuples from an sql execution
-    #### YOUR CODE HERE
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = execute_query(*args, **kwargs)
+        return pd.DataFrame(
+            result,
+            columns=['positive_events', 'negative_events']
+        )
 
-        # Query 6
-        # Write an SQL query
-        # that selects the team_name column
-        # Use f-string formatting and a WHERE filter
-        # to only return the team name related to
-        # the ID argument
-        #### YOUR CODE HERE
+    return wrapper
 
 
-    # Below is method with an SQL query
-    # This SQL query generates the data needed for
-    # the machine learning model.
-    # Without editing the query, alter this method
-    # so when it is called, a pandas dataframe
-    # is returns containing the execution of
-    # the sql query
-    #### YOUR CODE HERE
+# Create a subclass of QueryBase called Team
+class Team(QueryBase):
+
+    # Set the class attribute name
+    name = "team"
+
+    # Define the names method
+    @query
+    def names(self):
+
+        # Query 5: Select all teams
+        return """
+            SELECT team_name, team_id
+            FROM team
+        """
+
+    # Define the username method
+    @query
+    def username(self, id):
+
+        # Query 6: Select team name by ID
+        return f"""
+            SELECT team_name
+            FROM team
+            WHERE team_id = {int(id)}
+        """
+
+    # Return model data as a pandas DataFrame
+    @pandas_query
     def model_data(self, id):
 
         return f"""
