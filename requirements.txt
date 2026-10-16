@@ -7,4 +7,7 @@ pandas==2.2.3
 pytest
 flake8
 ipython
+sqlite-minutils==4.0.3
+fastcore==1.14.5
+starlette==0.41.3
 -e ./python-package
